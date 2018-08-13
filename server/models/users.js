@@ -51,3 +51,17 @@ module.exports.getUserById = function(id) {
         return getters(users[index]);
     else return null;
 }
+
+module.exports.emailExists = function(value) {
+    try {
+        var index = _.findIndex(users, function(obj) {
+            return obj.email == value;
+        });
+        return (index >= 0) ? true : false;
+    }
+    catch(e) {
+        console.log(e);
+        return false;
+    }
+    
+}

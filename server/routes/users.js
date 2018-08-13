@@ -5,5 +5,6 @@ var userValidator = require('../validators/users');
 
 router.get('/', usersController.index);
 router.get('/:id', userValidator.id, usersController.index);
+router.post('/', userValidator.add, usersController.add);
 
 module.exports = router;
