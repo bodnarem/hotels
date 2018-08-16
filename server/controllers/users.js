@@ -28,7 +28,11 @@ module.exports.index = function(req, res, next) {
             }
         }
         else
-            res.json(userModel.getUsers());
+            res.status(200).json({
+                type: 'success',
+                msg: 'Успешный поиск пользователей',
+                data: userModel.getUsers()
+            });
     }
     catch(err) {
         console.log(err);
