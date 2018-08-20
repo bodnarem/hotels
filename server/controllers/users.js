@@ -1,11 +1,10 @@
 var userModel = require('../models/users');
-const { validationResult } = require('express-validator/check');
-const errorFormat = require('../validators/format');
+var jwtConfig = require('../config').jwt;
+var jwt = require('jsonwebtoken');
 
 module.exports.index = function(req, res, next) {
     try {
         if(req.params.hasOwnProperty('id')){
-            const errors = validationResult(req);
             var user = userModel.getUserById(req.params.id);
             if( user !== null) {
                 res.json({
@@ -14,12 +13,6 @@ module.exports.index = function(req, res, next) {
                     data: user
                 });
             } 
-            else if(!errors.isEmpty()) {
-                res.status(400).json({
-                    type: 'validation_error',
-                    data: errors.formatWith(errorFormat).array()
-                })
-            }
             else {
                 res.status(404).json({
                     type: 'error',
@@ -41,35 +34,53 @@ module.exports.index = function(req, res, next) {
 }
 
 module.exports.add = function(req, res, next) {
-    const errors = validationResult(req);
-    if(errors.isEmpty()) {
-        
-        const newUser = {
-            id: userModel.length+1,
-            firstname: req.body.firstname,
-            middlename: req.body.middlename,
-            secondname: req.body.secondname,
-            email: req.body.email
-        };
+    const newUser = {
+        id: userModel.length+1,
+        firstname: req.body.firstname,
+        middlename: req.body.middlename,
+        secondname: req.body.secondname,
+        email: req.body.email
+    };
 
-        try {
-            userModel.push(newUser);
-        }
-        catch(err) {
-            console.log(err);
-            next('Не удалось добавить нового пользователя');
-        }
-        
-        res.status(200).json({
-            type: 'success',
-            msg: 'Пользователь добавлен',
-            data: newUser
-        });
+    try {
+        userModel.push(newUser);
     }
-    else {
-        res.status(400).json({
-            type: 'validation_error',
-            data: errors.formatWith(errorFormat).array()
-        })
+    catch(err) {
+        console.log(err);
+        next('Не удалось добавить нового пользователя');
+    }
+    
+    res.status(200).json({
+        type: 'success',
+        msg: 'Пользователь добавлен',
+        data: newUser
+    });
+}
+
+module.exports.login = function(req, res, next) {
+    var { email, password } = req.body;
+    try {
+        var user = userModel.find(email, password);
+        if(user !== null)
+        {
+            var token = jwt.sign({id: user.id}, jwtConfig.secret, {expiresIn: '60d'});
+            res.status(200).json({
+                type: 'success',
+                msg: 'Успешная авторизация',
+                data: {
+                    token: token,
+                    user: user
+                }
+            });
+        }
+        else
+            res.status(403).json({
+                type: 'auth_error',
+                msg: 'Неверный email или пароль'
+            });
+    }
+    catch(err) {
+        console.log(err);
+        next('Ошибка авторизации');
     }
 }

@@ -21,3 +21,10 @@ module.exports.add = [
         .exists().withMessage('Поле обязательно для заполнения')
         .isLength({max: 32}).withMessage('Слишком длинное имя')
 ]
+
+module.exports.login = [
+    body('email')
+        .exists().withMessage('Поле обязательно для заполнения'),
+    body('password')
+        .exists().withMessage('Поле обязательно для заполнения')
+]

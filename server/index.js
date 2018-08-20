@@ -1,4 +1,6 @@
+var dotenv = require('dotenv').config();
 var express = require('express');
+var config = require('./config');
 var bodyParser = require('body-parser');
 var routerIndex = require('./routes');
 var routerHotel = require('./routes/hotel.js');
@@ -26,18 +28,27 @@ app.use('*', function(req, res, next){
         'msg': 'Неизвестный маршрут'
     })
 });
+
 // Errors
 app.use(function(err, req, res, next){
+    if(err.hasOwnProperty('msg') && err.hasOwnProperty('type'))
+        res.send({
+            'type': err.type,
+            'msg': err.msg
+        })
+});
+
+app.use(function(err, req, res, next){
     res.send({
-        'status': 'error',
+        'type': 'error',
         'msg': 'Ошибка сервера',
         'err': err 
     })
 });
 
-app.listen(3200, function(err){
+app.listen(config.server.port, function(err){
     if(err)
         console.log(err);
     else
-        console.log('Server start on port 3200');
+        console.log('Server start on port: %d', config.server.port);
 })

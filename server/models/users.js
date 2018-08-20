@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var bcrypt = require('bcrypt-nodejs');
 
 const users = [
     {
@@ -7,7 +8,7 @@ const users = [
         firstname: 'Иван',
         middlename: 'Иванович',
         secondname: 'Иванов',
-        hash: '827ccb0eea8a706c4c34a16891f84e7b'
+        hash: '$2a$10$M7ekwnib7VE3lklTVNL5d.X1VkNNbMCmzyAgJKMuhLutycvoh17pe'
     },
     {
         id: 2,
@@ -15,7 +16,7 @@ const users = [
         firstname: 'Валерий',
         middlename: 'Юсупович',
         secondname: 'Свиблов',
-        hash: '827ccb0eea8a706c4c34a16891f84e7b'
+        hash: '$2a$10$M7ekwnib7VE3lklTVNL5d.X1VkNNbMCmzyAgJKMuhLutycvoh17pe'
     },
     {
         id: 3,
@@ -64,4 +65,13 @@ module.exports.emailExists = function(value) {
         return false;
     }
     
+}
+
+module.exports.find = function(email, password) {
+    var index = _.findIndex(users, function(obj) { 
+        return obj.email == email && bcrypt.compareSync(password, obj.hash); 
+    });
+    if(index >= 0)
+        return getters(users[index]);
+    else return null;
 }
