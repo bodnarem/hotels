@@ -75,3 +75,16 @@ module.exports.find = function(email, password) {
         return getters(users[index]);
     else return null;
 }
+
+module.exports.addUser = function(data) {
+    user = {
+        id: users.length,
+        firstname: data.firstname,
+        lastname: data.lastname,
+        middlename: data.middlename,
+        email: data.email,
+        hash: bcrypt.hashSync(data.password, bcrypt.genSaltSync(8), null)
+    };
+    users.push(user);
+    return user;
+}

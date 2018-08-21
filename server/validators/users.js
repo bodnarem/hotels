@@ -5,7 +5,7 @@ module.exports.id = [
     param('id').isNumeric().withMessage('Неверный id пользователя')
 ]
 
-module.exports.add = [
+module.exports.register = [
     body('email')
         .exists().withMessage('Поле обязательно для заполнения')
         .isEmail().withMessage('Неверный формат email адреса')
@@ -17,9 +17,20 @@ module.exports.add = [
     body('password')
         .exists().withMessage('Поле обязательно для заполнения')
         .isLength({min: 5}).withMessage('Минимальная длина пароля 5 символов'),
+    body('password_confirm')
+        .custom(function(value, { req }){
+            if (value !== req.body.password) {
+                return Promise.reject('Введенные пароли не совпадают');
+            }
+            else
+                return true
+        }),
     body('firstname')
         .exists().withMessage('Поле обязательно для заполнения')
-        .isLength({max: 32}).withMessage('Слишком длинное имя')
+        .isLength({min: 1, max: 32}).withMessage('Неверный размер поля Имя'),
+    body('lastname')
+        .exists().withMessage('Поле обязательно для заполнения')
+        .isLength({min: 1, max: 32}).withMessage('Неверный размер поля Фамилия')
 ]
 
 module.exports.login = [

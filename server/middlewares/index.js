@@ -11,7 +11,6 @@ module.exports.checkAuth = function(req, res, next)
             if(err) return next({type: 'auth_error', msg: 'Ошибка верификации токена'});
             else {
                 req.user = decode;
-                console.log(req.user);
                 next();
             }
         });

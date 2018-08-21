@@ -33,37 +33,13 @@ module.exports.index = function(req, res, next) {
     }
 }
 
-module.exports.add = function(req, res, next) {
-    const newUser = {
-        id: userModel.length+1,
-        firstname: req.body.firstname,
-        middlename: req.body.middlename,
-        secondname: req.body.secondname,
-        email: req.body.email
-    };
-
-    try {
-        userModel.push(newUser);
-    }
-    catch(err) {
-        console.log(err);
-        next('Не удалось добавить нового пользователя');
-    }
-    
-    res.status(200).json({
-        type: 'success',
-        msg: 'Пользователь добавлен',
-        data: newUser
-    });
-}
-
 module.exports.login = function(req, res, next) {
     var { email, password } = req.body;
     try {
         var user = userModel.find(email, password);
         if(user !== null)
         {
-            var token = jwt.sign({id: user.id}, jwtConfig.secret, {expiresIn: '60d'});
+            var token = jwt.sign({id: user.id}, jwtConfig.secret, {expiresIn: jwtConfig.expiresIn});
             res.status(200).json({
                 type: 'success',
                 msg: 'Успешная авторизация',
@@ -82,5 +58,24 @@ module.exports.login = function(req, res, next) {
     catch(err) {
         console.log(err);
         next('Ошибка авторизации');
+    }
+}
+
+module.exports.register = function(req, res, next) {
+    try {
+        var newUser = userModel.addUser(req.body);
+        var token = jwt.sign({id: newUser.id}, jwtConfig.secret, {expiresIn: jwtConfig.expiresIn});
+        res.status(200).json({
+            type: 'success',
+            msg: 'Пользователь добавлен',
+            data: {
+                user: newUser,
+                token: token
+            }
+        });
+    }
+    catch(err) {
+        console.log('controller ' + err);
+        next('Ошибка регистрации пользователя');
     }
 }

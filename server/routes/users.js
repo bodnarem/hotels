@@ -18,7 +18,7 @@ function isError(req, res, next) {
 
 router.get('/', middlewares.checkAuth, usersController.index);
 router.get('/:id', middlewares.checkAuth, userValidator.id, isError, usersController.index);
-router.post('/', userValidator.add, isError, usersController.add);
+router.post('/', userValidator.register, isError, usersController.register);
 router.post('/login', userValidator.login, isError, usersController.login);
 
 module.exports = router;
