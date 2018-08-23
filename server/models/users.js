@@ -1,90 +1,72 @@
-var _ = require('lodash');
-var bcrypt = require('bcrypt-nodejs');
-
-const users = [
-    {
-        id: 1,
-        email: 'admin@hotels.ru',
-        firstname: 'Иван',
-        middlename: 'Иванович',
-        secondname: 'Иванов',
-        hash: '$2a$10$M7ekwnib7VE3lklTVNL5d.X1VkNNbMCmzyAgJKMuhLutycvoh17pe'
-    },
-    {
-        id: 2,
-        email: 'svibl@gmail.com',
-        firstname: 'Валерий',
-        middlename: 'Юсупович',
-        secondname: 'Свиблов',
-        hash: '$2a$10$M7ekwnib7VE3lklTVNL5d.X1VkNNbMCmzyAgJKMuhLutycvoh17pe'
-    },
-    {
-        id: 3,
-        email: 'test@mail.ru',
-        firstname: 'Петр',
-        middlename: 'Семенович',
-        secondname: 'Капустин',
-        hash: '827ccb0eea8a706c4c34a16891f84e7b'
-    }
-]
-
-module.exports = users;
-
-function getters(user) {
-    return {
-        id: user.id,
-        email: user.email,
-        firstname: user.firstname,
-        secondname: user.secondname,
-        middlename: user.middlename
-    }
-}
-
-module.exports.getUsers = function() {
-    return _.map(users, getters);
-}
-
-module.exports.getUserById = function(id) {
-    var index = _.findIndex(users, function(obj) { 
-        return obj.id == id 
+module.exports = function(sequelize, DataType) {
+    var User = sequelize.define('users', {
+		id: {
+			autoIncrement: true,
+			primaryKey: true,
+			type: DataType.INTEGER(10).UNSIGNED
+		},
+		email: {
+			type: DataType.STRING,
+			allowNull: false,	
+			notNull: true,
+			validate: {
+				isEmail: {args: true, msg: "Неверный формат email адреса"},
+				isUnique: function(email, next) {
+					User.findOne({where: {email: email}})
+					.then(function(user){
+						if(user) next("Пользователь с таким email уже зарегистрирован");
+						else next();
+					});
+				}
+			}
+        },
+        hash: {
+            type: DataType.STRING(64),
+            allowNull: false,
+            notNull: true
+        },
+		firstname: {
+			type: DataType.STRING(32),
+			allowNull: false,
+			validate: {
+				len: {args: [2, 24], msg: "Неверный размер поля Имя"}
+			}
+		},
+		middlename: {
+			type: DataType.STRING(32),
+			allowNull: true
+        },
+        lastname: {
+			type: DataType.STRING(32),
+			allowNull: false,
+			validate: {
+				len: {args: [2, 24], msg: "Неверный размер поля Фамилия"}
+			}
+		},
+	},
+	{
+		timestamps: true,
+		underscored: true,
+		charset: 'utf8',
+		indexes: [
+			{
+			  unique: true,
+			  fields: ['email']
+			}
+		]
     });
-    if(index >= 0)
-        return getters(users[index]);
-    else return null;
-}
 
-module.exports.emailExists = function(value) {
-    try {
-        var index = _.findIndex(users, function(obj) {
-            return obj.email == value;
-        });
-        return (index >= 0) ? true : false;
+    User.prototype.getResultData = function() {
+        return {
+			id: this.id,
+			email: this.email,
+			firstname: this.firstname,
+			middlename: this.middlename,
+			lastname: this.lastname,
+			created_at: this.created_at,
+			updated_at: this.updated_at
+		}
     }
-    catch(e) {
-        console.log(e);
-        return false;
-    }
-    
-}
 
-module.exports.find = function(email, password) {
-    var index = _.findIndex(users, function(obj) { 
-        return obj.email == email && bcrypt.compareSync(password, obj.hash); 
-    });
-    if(index >= 0)
-        return getters(users[index]);
-    else return null;
-}
-
-module.exports.addUser = function(data) {
-    user = {
-        id: users.length,
-        firstname: data.firstname,
-        lastname: data.lastname,
-        middlename: data.middlename,
-        email: data.email,
-        hash: bcrypt.hashSync(data.password, bcrypt.genSaltSync(8), null)
-    };
-    users.push(user);
-    return user;
+    return User;
 }
