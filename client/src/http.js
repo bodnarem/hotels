@@ -1,14 +1,11 @@
-import Axios from 'axios'
-import Store from './store'
+import axios from 'axios'
+import store from './store/index'
 
-/* eslint-disable */
-console.log(Store);
-
-const http = Axios.create({
-    baseURL: 'http://localhost:3200',
+const http = axios.create({
+    baseURL: 'http://localhost:3200/api/v1/',
     headers: {
-        Authorization: 'какой то токен'
+        Authorization: store.getters.token
     }
-});
+})
 
 export default http;

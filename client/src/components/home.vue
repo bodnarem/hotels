@@ -1,7 +1,6 @@
 <template>
     <v-app>
         <c-header></c-header>
-        {{ user }}
     </v-app>
 </template>
 
@@ -18,11 +17,6 @@ export default {
         return {
 
         }
-    },
-    computed: {
-        ...mapGetters({
-            user: 'getUser'
-        })
     }
 }
 </script>

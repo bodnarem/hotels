@@ -1,47 +1,37 @@
-const LOGIN = 'LOGIN';
-const SET_TOKEN = 'SET_TOKEN';
-
 import http from '../../http'
 
 const state = {
-    user: {
-        token: localStorage.getItem('token'),
-        firstname: '',
-        secondname: ''
-    }
+    token: localStorage.getItem('token')
 }
 
 const mutations = {
-    [LOGIN]: (state, user) => {
-        state.user = user;
-    },
-
-    [SET_TOKEN]: (state, token) => {
+    login(state, token) {
         state.token = token;
+        localStorage.setItem('token', token);
     }
 }
 
 const actions = {
-    [LOGIN]: async ({commit}, payload) => {
-        await http.post('/users/login', payload)
-            .then((pkg) => {
-                const req = pkg.data;
-                commit('SET_TOKEN', req.data.token);
-                commit('LOGIN', req.data.user)
-            })
-            .catch(() => {
-                
-            })
+    login({commit}, data) {
+        return new Promise((resolve, reject) => {
+            http.post('users/login', data).then(response => {
+                if(response.data.data.status == 'success')
+                {
+                    commit('login', response.data.data.token);
+                    resolve(response);
+                }
+                else
+                    reject(response);
+            }).catch(reason => {
+                reject(reason);
+            });
+        });
     }
-}   
+}
 
 const getters = {
     getToken(state) {
         return state.token;
-    },
-
-    getUser(state) {
-        return state.user;
     }
 }
 

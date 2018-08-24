@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import HomeComponent from '../components/home.vue'
 import LoginComponent from '../components/login.vue'
 import RegisterComponent from '../components/register.vue'
+import http from '../http'
 
 Vue.use(VueRouter);
 
